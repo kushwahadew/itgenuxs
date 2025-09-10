@@ -1,17 +1,19 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Menu, X } from "lucide-react";
-import { useTheme } from "@/components/ThemeProvider";
 import Image from "next/image";
 import Link from "next/link";
+import { Moon, Sun, Menu, X, User, Users, LogOut } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { currentUser, logout, isAuthenticated, isAdmin } = useAuth();
 
-  // ✅ Use full URLs with / for navigation
   const navItems = [
     { name: "Home", href: "/" },
     { name: "About", href: "/#about" },
@@ -39,17 +41,11 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="relative w-24 h-16">
-            <Image
-              src="/favicon.ico"
-              alt="Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+            <Image src="/favicon.ico" alt="Logo" fill className="object-contain" priority />
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -63,6 +59,33 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+
+            {isAuthenticated ? (
+              <>
+                {isAdmin ? (
+                  <Link href="/admin/dashboard">
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <Users size={16} /> Admin Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/employee/dashboard">
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <User size={16} /> Dashboard
+                    </Button>
+                  </Link>
+                )}
+
+                {/* Logout button for desktop */}
+                <Button variant="outline" size="sm" onClick={logout} className="flex items-center gap-2">
+                  <LogOut size={16} /> Logout
+                </Button>
+              </>
+            ) : (
+              <Link href="/login">
+                <Button size="sm">Login</Button>
+              </Link>
+            )}
           </div>
 
           {/* Theme & Mobile Menu */}
@@ -77,11 +100,7 @@ const Navigation = () => {
                   : "hover:bg-white/10 text-white/90 hover:text-white"
               }`}
             >
-              {theme === "light" ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
-              )}
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </Button>
 
             <Button
@@ -113,6 +132,31 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
+
+              {isAuthenticated ? (
+                <>
+                  <span className="text-sm text-muted-foreground px-4">
+                    Welcome, {currentUser?.name}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 px-4"
+                  >
+                    <LogOut size={16} /> Logout
+                  </Button>
+                </>
+              ) : (
+                <Link href="/login">
+                  <Button size="sm" className="px-4">
+                    Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}
