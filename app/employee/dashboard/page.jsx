@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -93,6 +94,7 @@ const EmployeeDashboard = () => {
 
     const today = new Date().toISOString().split("T")[0];
     const now = new Date().toISOString();
+
     const storedAttendance = localStorage.getItem("attendance");
     const allAttendance = storedAttendance ? JSON.parse(storedAttendance) : [];
 
@@ -137,6 +139,7 @@ const EmployeeDashboard = () => {
 
     const today = new Date().toISOString().split("T")[0];
     const now = new Date().toISOString();
+
     const storedAttendance = localStorage.getItem("attendance");
     const allAttendance = storedAttendance ? JSON.parse(storedAttendance) : [];
 
@@ -186,10 +189,15 @@ const EmployeeDashboard = () => {
     const employees = JSON.parse(localStorage.getItem("employees") || "[]");
     const updatedEmployees = employees.map((emp) => {
       if (emp.id === currentUser.id) {
-        return { ...emp, name: editForm.name, email: editForm.email };
+        return {
+          ...emp,
+          name: editForm.name,
+          email: editForm.email,
+        };
       }
       return emp;
     });
+
     localStorage.setItem("employees", JSON.stringify(updatedEmployees));
 
     if (editForm.password) {
@@ -198,7 +206,11 @@ const EmployeeDashboard = () => {
       localStorage.setItem("passwords", JSON.stringify(passwords));
     }
 
-    const updatedUser = { ...currentUser, name: editForm.name, email: editForm.email };
+    const updatedUser = {
+      ...currentUser,
+      name: editForm.name,
+      email: editForm.email,
+    };
     localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
     setIsEditDialogOpen(false);
@@ -212,88 +224,123 @@ const EmployeeDashboard = () => {
     window.location.reload();
   };
 
-  const formatTime = (timestamp) => new Date(timestamp).toLocaleTimeString();
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString();
+  const formatTime = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString();
+  };
 
-  if (!isAuthenticated || !currentUser) return null;
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString();
+  };
+
+  if (!isAuthenticated || !currentUser) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-background pt-20">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       <div className="container mx-auto p-6">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Employee Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {currentUser.name}</p>
         </div>
 
-        {/* Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Profile */}
+          {/* Profile Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User size={20} /> Profile Information
+                <User size={20} />
+                Profile Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Employee ID</Label>
-                <p className="text-sm text-muted-foreground">{currentUser.empId}</p>
-              </div>
-              <div>
-                <Label>Name</Label>
-                <p className="text-sm text-muted-foreground">{currentUser.name}</p>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <p className="text-sm text-muted-foreground">{currentUser.email}</p>
-              </div>
-              <div>
-                <Label>Department</Label>
-                <p className="text-sm text-muted-foreground">{currentUser.dept}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Employee ID</Label>
+                  <p className="text-sm text-muted-foreground">{currentUser.empId}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Role</Label>
+                  <Badge
+                    variant={currentUser.role === "admin" ? "default" : "secondary"}
+                  >
+                    {currentUser.role}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Name</Label>
+                  <p className="text-sm text-muted-foreground">{currentUser.name}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Joining Date</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(currentUser.createdAt)}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Email</Label>
+                  <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Department</Label>
+                  <p className="text-sm text-muted-foreground">{currentUser.dept}</p>
+                </div>
               </div>
 
               <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full flex items-center gap-2">
-                    <Edit size={16} /> Edit Profile
+                    <Edit size={16} />
+                    Edit Profile
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>
                     <DialogDescription>
-                      Update your profile info. Leave password blank to keep current password.
+                      Update your profile information. Leave password blank to keep
+                      current password.
                     </DialogDescription>
                   </DialogHeader>
+
                   <div className="space-y-4">
                     <div>
-                      <Label>Name</Label>
+                      <Label htmlFor="editName">Name</Label>
                       <Input
+                        id="editName"
                         value={editForm.name}
-                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, name: e.target.value })
+                        }
                       />
                     </div>
                     <div>
-                      <Label>Email</Label>
+                      <Label htmlFor="editEmail">Email</Label>
                       <Input
+                        id="editEmail"
                         type="email"
                         value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, email: e.target.value })
+                        }
                       />
                     </div>
                     <div>
-                      <Label>New Password (optional)</Label>
+                      <Label htmlFor="editPassword">New Password (optional)</Label>
                       <Input
+                        id="editPassword"
                         type="password"
                         value={editForm.password}
-                        onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, password: e.target.value })
+                        }
                         placeholder="Enter new password"
                       />
                     </div>
                   </div>
+
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                       Cancel
@@ -309,32 +356,47 @@ const EmployeeDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock size={20} /> Today's Attendance
+                <Clock size={20} />
+                Today's Attendance
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                {new Date().toLocaleDateString()}
-              </p>
-              {todayAttendance?.checkIn && (
-                <p className="text-lg font-bold text-green-600">
-                  Check-in: {formatTime(todayAttendance.checkIn)}
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  {new Date().toLocaleDateString()}
                 </p>
-              )}
-              {todayAttendance?.checkOut && (
-                <p className="text-lg font-bold text-red-600">
-                  Check-out: {formatTime(todayAttendance.checkOut)}
-                </p>
-              )}
-              {!todayAttendance?.checkIn && <p className="text-muted-foreground">No check-in today</p>}
 
-              <div className="flex gap-2 mt-2">
+                {todayAttendance?.checkIn && (
+                  <div className="mb-2">
+                    <p className="text-sm font-medium">Check-in</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {formatTime(todayAttendance.checkIn)}
+                    </p>
+                  </div>
+                )}
+
+                {todayAttendance?.checkOut && (
+                  <div className="mb-2">
+                    <p className="text-sm font-medium">Check-out</p>
+                    <p className="text-lg font-bold text-red-600">
+                      {formatTime(todayAttendance.checkOut)}
+                    </p>
+                  </div>
+                )}
+
+                {!todayAttendance?.checkIn && (
+                  <p className="text-muted-foreground">No check-in today</p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
                 <Button
                   onClick={handleCheckIn}
                   disabled={!!todayAttendance?.checkIn}
                   className="flex-1 flex items-center gap-2"
                 >
-                  <LogIn size={16} /> Check In
+                  <LogIn size={16} />
+                  Check In
                 </Button>
                 <Button
                   onClick={handleCheckOut}
@@ -342,31 +404,71 @@ const EmployeeDashboard = () => {
                   disabled={!todayAttendance?.checkIn || !!todayAttendance?.checkOut}
                   className="flex-1 flex items-center gap-2"
                 >
-                  <LogOut size={16} /> Check Out
+                  <LogOut size={16} />
+                  Check Out
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Attendance Summary */}
+          {/* Attendance Stats */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar size={20} /> Attendance Summary
+                <Calendar size={20} />
+                Attendance Summary
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div>
-                  <Label>Total Records</Label>
-                  <p className="text-2xl font-bold">{attendance.length}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-muted rounded-lg">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Total Records
+                  </Label>
+                  <p className="text-2xl font-bold text-primary">{attendance.length}</p>
                 </div>
-                <div>
-                  <Label>This Month</Label>
-                  <p className="text-2xl font-bold">
-                    {attendance.filter(
-                      (record) => new Date(record.date).getMonth() === new Date().getMonth()
-                    ).length}
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    This Month
+                  </Label>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {
+                      attendance.filter(
+                        (record) =>
+                          new Date(record.date).getMonth() === new Date().getMonth()
+                      ).length
+                    }
+                  </p>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Present Days
+                  </Label>
+                  <p className="text-2xl font-bold text-green-600">
+                    {attendance.filter((record) => record.checkIn).length}
+                  </p>
+                </div>
+                <div className="text-center p-3 bg-orange-50 rounded-lg">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Avg Hours/Day
+                  </Label>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {attendance.filter((record) => record.checkIn && record.checkOut)
+                      .length > 0
+                      ? (
+                          attendance
+                            .filter((record) => record.checkIn && record.checkOut)
+                            .reduce((sum, record) => {
+                              const checkIn = new Date(record.checkIn);
+                              const checkOut = new Date(record.checkOut);
+                              return (
+                                sum + (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60)
+                              );
+                            }, 0) /
+                          attendance.filter((record) => record.checkIn && record.checkOut).length
+                        ).toFixed(1)
+                      : "0"}
+                    h
                   </p>
                 </div>
               </div>
@@ -374,11 +476,13 @@ const EmployeeDashboard = () => {
           </Card>
         </div>
 
-        {/* Attendance History Table */}
+        {/* Attendance History */}
         <Card>
           <CardHeader>
             <CardTitle>Attendance History</CardTitle>
-            <CardDescription>Your recent attendance records (last 14 entries)</CardDescription>
+            <CardDescription>
+              Your recent attendance records (last 14 entries)
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -391,26 +495,38 @@ const EmployeeDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {attendance.length > 0 ? (
-                  attendance.map((record) => {
-                    const checkInTime = record.checkIn ? new Date(record.checkIn) : null;
-                    const checkOutTime = record.checkOut ? new Date(record.checkOut) : null;
-                    const totalHours =
-                      checkInTime && checkOutTime
-                        ? ((checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60 * 60)).toFixed(1)
-                        : "-";
-                    return (
-                      <TableRow key={record.id}>
-                        <TableCell>{formatDate(record.date)}</TableCell>
-                        <TableCell>{record.checkIn ? formatTime(record.checkIn) : "-"}</TableCell>
-                        <TableCell>{record.checkOut ? formatTime(record.checkOut) : "-"}</TableCell>
-                        <TableCell>{totalHours !== "-" ? `${totalHours}h` : "-"}</TableCell>
-                      </TableRow>
-                    );
-                  })
-                ) : (
+                {attendance.map((record) => {
+                  const checkInTime = record.checkIn ? new Date(record.checkIn) : null;
+                  const checkOutTime = record.checkOut ? new Date(record.checkOut) : null;
+                  const totalHours =
+                    checkInTime && checkOutTime
+                      ? (
+                          (checkOutTime.getTime() - checkInTime.getTime()) /
+                          (1000 * 60 * 60)
+                        ).toFixed(1)
+                      : "-";
+
+                  return (
+                    <TableRow key={record.id}>
+                      <TableCell>{formatDate(record.date)}</TableCell>
+                      <TableCell>
+                        {record.checkIn ? formatTime(record.checkIn) : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {record.checkOut ? formatTime(record.checkOut) : "-"}
+                      </TableCell>
+                      <TableCell>
+                        {totalHours !== "-" ? `${totalHours}h` : "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {attendance.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-muted-foreground"
+                    >
                       No attendance records found
                     </TableCell>
                   </TableRow>
