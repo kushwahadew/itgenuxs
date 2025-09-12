@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
+import api from "@/lib/api";
 
 const AuthContext = createContext();
 
@@ -15,69 +16,49 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
     if (storedUser) setCurrentUser(JSON.parse(storedUser));
-    initializeMockData();
   }, []);
 
-  const initializeMockData = () => {
-    if (!localStorage.getItem("employees")) {
-      const mockEmployees = [
-        {
-          id: "1",
-          empId: "EMP001",
-          name: "Admin User",
-          email: "admin@company.com",
-          dept: "Administration",
-          role: "admin",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          empId: "EMP002",
-          name: "John Doe",
-          email: "john@company.com",
-          dept: "Engineering",
-          role: "employee",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "3",
-          empId: "EMP003",
-          name: "Jane Smith",
-          email: "jane@company.com",
-          dept: "Marketing",
-          role: "employee",
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      localStorage.setItem("employees", JSON.stringify(mockEmployees));
-    }
-
-    if (!localStorage.getItem("passwords")) {
-      const mockPasswords = {
-        EMP001: "admin123",
-        EMP002: "employee123",
-        EMP003: "employee123",
-      };
-      localStorage.setItem("passwords", JSON.stringify(mockPasswords));
-    }
-  };
-
+  // ----------------- LOGIN FUNCTION -----------------
   const login = async (empId, password, asAdmin = false) => {
-    const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-    const passwords = JSON.parse(localStorage.getItem("passwords") || "{}");
-    const employee = employees.find((e) => e.empId === empId);
+    try {
+      const response = await api.post(
+        "/api/v1/users/login", // change to your backend URL
+        {
+          employeeid: empId,
+          password,
+          asAdmin,
+        },
+        { withCredentials: true } // if backend sets httpOnly cookies
+      );
 
-    if (!employee || passwords[empId] !== password) return false;
-    if (asAdmin && employee.role !== "admin") return false;
+      const user = response.data.data.user; // backend sends { user, accessToken, refreshToken }
 
-    setCurrentUser(employee);
-    localStorage.setItem("currentUser", JSON.stringify(employee));
-    return true;
+      if (asAdmin && user.role !== "admin") return false;
+
+      setCurrentUser(user);
+      localStorage.setItem("currentUser", JSON.stringify(user));
+
+      return true;
+    } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
+      return false;
+    }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem("currentUser");
+  // ----------------- LOGOUT FUNCTION -----------------
+  const logout = async () => {
+    try {
+      await api.post(
+        "/api/v1/users/logout",
+        {},
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error("Logout error:", error.response?.data || error.message);
+    } finally {
+      setCurrentUser(null);
+      localStorage.removeItem("currentUser");
+    }
   };
 
   return (
