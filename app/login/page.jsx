@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -58,7 +64,9 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Employee Login</CardTitle>
-          <CardDescription>Sign in to access your dashboard</CardDescription>
+          <CardDescription>
+            Sign in to access your dashboard
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -89,7 +97,7 @@ const Login = () => {
               <Checkbox
                 id="asAdmin"
                 checked={asAdmin}
-                onChange={(e) => setAsAdmin(e.target.checked)}
+                onCheckedChange={(checked) => setAsAdmin(!!checked)}
               />
               <Label htmlFor="asAdmin" className="text-sm">
                 Login as Administrator
@@ -110,8 +118,12 @@ const Login = () => {
           <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">Demo Credentials:</p>
             <div className="text-xs space-y-1">
-              <p><strong>Admin:</strong> EMP001 / admin123</p>
-              <p><strong>Employee:</strong> EMP002 / employee123</p>
+              <p>
+                <strong>Admin:</strong> EMP001 / admin123
+              </p>
+              <p>
+                <strong>Employee:</strong> EMP002 / employee123
+              </p>
             </div>
           </div>
 

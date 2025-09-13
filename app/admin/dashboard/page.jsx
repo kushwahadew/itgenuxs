@@ -1,5 +1,6 @@
 "use client";
 
+import { io } from "socket.io-client";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -25,58 +26,124 @@ const AdminDashboard = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "", dept: "", password: "" });
-  
+  const [socket, setSocket] = useState(null);
   const { currentUser, logout } = useAuth();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true); // ✅ Loading state
 
   useEffect(() => {
+    const socketConnection = io(api.defaults.baseURL, { 
+      withCredentials: true,
+    });
+
+    setSocket(socketConnection);
+
+    // Listen for attendance updates
+    socketConnection.on("attendanceUpdated", (data) => {
+      loadTodayAttendance();
+      loadEmployees();
+    });
+
+    return () => socketConnection.disconnect();
+  }, []);
+
+  // -------------------- Fetch Employees & Attendance --------------------
+  useEffect(() => {
+    console.log("Current user:", currentUser);
+
+    if (currentUser === null) {
+      // Still fetching user, wait
+      return;
+    }
+
     if (!currentUser || currentUser.role !== "admin") {
+      console.log("Redirecting to login...");
       window.location.href = "/login";
       return;
     }
-    loadEmployees();
-    loadTodayAttendance();
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await loadEmployees();
+        await loadTodayAttendance();
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast({ title: "Error", description: "Failed to load dashboard", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [currentUser]);
 
   useEffect(() => {
-    filterEmployees();
-  }, [employees, attendanceFilter, todayAttendance]);
+    const timeout = setTimeout(() => {
+      if (loading) {
+        toast({
+          title: "Timeout",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+        window.location.href = "/"; // redirect to landing page
+      }
+    }, 5000); // 5 sec
 
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  // -------------------- Load Employees --------------------
   const loadEmployees = async () => {
     try {
       const { data } = await api.get("/api/v1/users");
       setEmployees(data.data || []);
     } catch (error) {
+      console.error("Failed to load employees:", error);
       toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
     }
   };
 
+  // -------------------- Load Today's Attendance --------------------
   const loadTodayAttendance = async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
       const { data } = await api.get(`/api/v1/attendances?date=${today}`);
+      console.log("Today's attendance:", data.data);
       setTodayAttendance(data.data || []);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to load attendance", variant: "destructive" });
+      console.error("Failed to load attendance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load attendance",
+        variant: "destructive",
+      });
     }
   };
 
-  const filterEmployees = () => {
+  // -------------------- Filter Employees --------------------
+  useEffect(() => {
     let filtered = employees;
 
     if (attendanceFilter !== "all") {
-      const employeesWithAttendance = employees.map(emp => ({
+      const employeesWithAttendance = employees.map((emp) => ({
         ...emp,
-        hasAttendanceToday: todayAttendance.some(record => record.employeeId === emp._id && record.checkIn)
+        hasAttendanceToday: todayAttendance.some(
+          (record) => record.user === emp._id && record.checkIn // ✅ fixed: "user" instead of "employeeId"
+        ),
       }));
 
-      if (attendanceFilter === "present") filtered = employeesWithAttendance.filter(emp => emp.hasAttendanceToday);
-      else if (attendanceFilter === "absent") filtered = employeesWithAttendance.filter(emp => !emp.hasAttendanceToday);
+      if (attendanceFilter === "present")
+        filtered = employeesWithAttendance.filter((emp) => emp.hasAttendanceToday);
+      else if (attendanceFilter === "absent")
+        filtered = employeesWithAttendance.filter((emp) => !emp.hasAttendanceToday);
     }
 
     setFilteredEmployees(filtered);
-  };
+  }, [employees, attendanceFilter, todayAttendance]);
 
+
+  // -------------------- Stats --------------------
   const getTodayStats = () => {
     const totalEmployees = employees.length;
     const presentToday = todayAttendance.filter(record => record.checkIn).length;
@@ -84,6 +151,7 @@ const AdminDashboard = () => {
     return { totalEmployees, presentToday, absentToday };
   };
 
+  // -------------------- Employee Actions --------------------
   const handleAddEmployee = async () => {
     if (!newEmployee.name || !newEmployee.email || !newEmployee.dept || !newEmployee.password) {
       toast({ title: "Error", description: "All fields are required", variant: "destructive" });
@@ -91,7 +159,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const { data } = await api.post("/api/v1/users", {
+      const { data } = await api.post("/api/v1/users/add", {
         name: newEmployee.name,
         email: newEmployee.email,
         department: newEmployee.dept,
@@ -103,6 +171,7 @@ const AdminDashboard = () => {
       setIsAddDialogOpen(false);
       toast({ title: "Success", description: `Employee ${data.data.employeeid} created successfully` });
     } catch (error) {
+      console.error("Failed to add employee:", error);
       toast({ title: "Error", description: error.response?.data?.message || "Failed to add employee", variant: "destructive" });
     }
   };
@@ -113,7 +182,28 @@ const AdminDashboard = () => {
       setEmployees(prev => prev.filter(emp => emp._id !== id));
       toast({ title: "Success", description: "Employee deleted successfully" });
     } catch (error) {
+      console.error("Failed to delete employee:", error);
       toast({ title: "Error", description: "Failed to delete employee", variant: "destructive" });
+    }
+  };
+
+  const handleViewEmployee = async (employee) => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      // ✅ get specific employee's today attendance
+      const { data } = await api.get(`/api/v1/attendances?date=${today}`);
+      setSelectedEmployee({
+        ...employee,
+        todayAttendance: data.data || null,
+      });
+      setIsDetailModalOpen(true);
+    } catch (error) {
+      console.error("Failed to load employee detail:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load employee detail",
+        variant: "destructive",
+      });
     }
   };
 
@@ -128,18 +218,23 @@ const AdminDashboard = () => {
     return colors[dept] || "bg-gray-100 text-gray-800";
   };
 
-  const handleViewEmployee = (employee) => {
-    setSelectedEmployee(employee);
-    setIsDetailModalOpen(true);
-  };
-
   const { totalEmployees, presentToday, absentToday } = getTodayStats();
 
+  // -------------------- Loading Screen --------------------
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg font-medium text-muted-foreground">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  // -------------------- Render Dashboard --------------------
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-20">
       <Navbar />
       <div className="container mx-auto p-6">
-        {/* Header + Add Employee Dialog */}
+        {/* Header + Add Employee */}
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>

@@ -35,11 +35,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Clock, LogIn, LogOut, Edit, User, Calendar } from "lucide-react";
 import Navbar from "@/components/Navigation";
 
+
 const EmployeeDashboard = () => {
   const [attendance, setAttendance] = useState([]);
   const [todayAttendance, setTodayAttendance] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", email: "", password: "" });
+  const [editForm, setEditForm] = useState({ name: "", email: "", oldPassword: "", newPassword: "" });
 
   const { currentUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -49,50 +50,60 @@ const EmployeeDashboard = () => {
       window.location.href = "/";
       return;
     }
-    loadAttendance();
-    loadTodayAttendance();
+    const fetchData = async () => {
+      await loadAttendance();
+      await loadTodayAttendance();
+      setEditForm({
+        name: currentUser.name,
+        email: currentUser.email,
+        oldPassword: "",
+        newPassword: ""
+      });
+    };
 
-    setEditForm({
-      name: currentUser.name,
-      email: currentUser.email,
-      password: "",
-    });
+    fetchData();
   }, [isAuthenticated, currentUser]);
 
   // --- API-based functions ---
   const loadAttendance = async () => {
-    if (!currentUser) return;
     try {
-      const res = await api.get(`/api/v1/attendances/${currentUser._id}`);
+      const res = await api.get(`/api/v1/attendances`);
       const records = res.data.data || [];
       records.sort((a, b) => new Date(b.date) - new Date(a.date));
       setAttendance(records.slice(0, 14));
     } catch (err) {
-      toast({ title: "Error", description: "Failed to load attendance", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to load attendance",
+        variant: "destructive",
+      });
     }
   };
 
   const loadTodayAttendance = async () => {
-    if (!currentUser) return;
     try {
       const today = new Date().toISOString().split("T")[0];
-      const res = await api.get(`/api/v1/attendances/${currentUser._id}/today?date=${today}`);
-      setTodayAttendance(res.data.data || null);
+      const res = await api.get(`/api/v1/attendances?date=${today}`);
+      setTodayAttendance(res.data.data?.[0] || null);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to load today's attendance", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to load today's attendance",
+        variant: "destructive",
+      });
     }
   };
 
   const handleCheckIn = async () => {
-    if (!currentUser) return;
     try {
-      const res = await api.post(`/api/v1/attendances/${currentUser._id}/checkin`);
+      const res = await api.post(`/api/v1/attendances/checkin`);
       toast({
         title: "Checked in successfully",
-        description: `Check-in time: ${new Date(res.data.checkIn).toLocaleTimeString()}`,
+        description: `Check-in time: ${new Date(res.data.data.checkIn).toLocaleTimeString()}`,
       });
-      loadAttendance();
-      loadTodayAttendance();
+      await loadAttendance();
+      await loadTodayAttendance();
+
     } catch (err) {
       toast({
         title: "Error",
@@ -103,15 +114,14 @@ const EmployeeDashboard = () => {
   };
 
   const handleCheckOut = async () => {
-    if (!currentUser) return;
     try {
-      const res = await api.post(`/api/v1/attendances/${currentUser._id}/checkout`);
+      const res = await api.post(`/api/v1/attendances/checkout`);
       toast({
         title: "Checked out successfully",
-        description: `Check-out time: ${new Date(res.data.checkOut).toLocaleTimeString()}`,
+        description: `Check-out time: ${new Date(res.data.data.checkOut).toLocaleTimeString()}`,
       });
-      loadAttendance();
-      loadTodayAttendance();
+      await loadAttendance();
+      await loadTodayAttendance();
     } catch (err) {
       toast({
         title: "Error",
@@ -122,33 +132,58 @@ const EmployeeDashboard = () => {
   };
 
   const handleUpdateProfile = async () => {
-    if (!currentUser || !editForm.name || !editForm.email) {
-      toast({ title: "Error", description: "Name and email are required", variant: "destructive" });
+    if (!editForm.name && !editForm.email && !editForm.oldPassword && !editForm.newPassword) {
+      toast({
+        title: "Error",
+        description: "At least one field must be filled to update",
+        variant: "destructive",
+      });
       return;
     }
+
+    const isOldPasswordFilled = editForm.oldPassword.trim() !== "";
+    const isNewPasswordFilled = editForm.newPassword.trim() !== "";
+
+    if ((isOldPasswordFilled && !isNewPasswordFilled) || (!isOldPasswordFilled && isNewPasswordFilled)) {
+      toast({
+        title: "Error",
+        description: "Both old and new passwords must be filled to update your password",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const res = await api.put(`/api/v1/users/${currentUser._id}`, {
+      await api.patch(`/api/v1/users/update`, {
         name: editForm.name,
         email: editForm.email,
-        password: editForm.password || undefined,
+        oldPassword: isOldPasswordFilled ? editForm.oldPassword : undefined,
+        newPassword: isNewPasswordFilled ? editForm.newPassword : undefined,
       });
 
-      toast({ title: "Profile updated", description: "Your profile has been updated successfully" });
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
       setIsEditDialogOpen(false);
       window.location.reload();
     } catch (err) {
-      toast({ title: "Error", description: err.response?.data?.message || "Failed to update profile", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to update profile",
+        variant: "destructive",
+      });
     }
   };
 
   // --- Formatting helpers ---
-  const formatTime = (timestamp) => (timestamp ? new Date(timestamp).toLocaleTimeString() : "-");
+  const formatTime = (timestamp) =>
+    timestamp ? new Date(timestamp).toLocaleTimeString() : "-";
   const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString();
 
   if (!isAuthenticated || !currentUser) return null;
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-20">
       <Navbar />
       <div className="container mx-auto p-6">
         <div className="mb-8">
@@ -214,8 +249,12 @@ const EmployeeDashboard = () => {
                       <Input id="editEmail" type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
                     </div>
                     <div>
+                      <Label htmlFor="editPassword">Old Password (optional)</Label>
+                      <Input id="editOldPassword" type="password" value={editForm.oldPassword} onChange={(e) => setEditForm({ ...editForm, oldPassword: e.target.value })} placeholder="Enter old password" />
+                    </div>
+                    <div>
                       <Label htmlFor="editPassword">New Password (optional)</Label>
-                      <Input id="editPassword" type="password" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} placeholder="Enter new password" />
+                      <Input id="editNewPassword" type="password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} placeholder="Enter new password" />
                     </div>
                   </div>
 
@@ -291,9 +330,9 @@ const EmployeeDashboard = () => {
                   <p className="text-2xl font-bold text-orange-600">
                     {attendance.filter(r => r.checkIn && r.checkOut).length
                       ? (
-                          attendance.filter(r => r.checkIn && r.checkOut).reduce((sum, r) => sum + (new Date(r.checkOut) - new Date(r.checkIn)) / (1000*60*60), 0) /
-                          attendance.filter(r => r.checkIn && r.checkOut).length
-                        ).toFixed(1)
+                        attendance.filter(r => r.checkIn && r.checkOut).reduce((sum, r) => sum + (new Date(r.checkOut) - new Date(r.checkIn)) / (1000 * 60 * 60), 0) /
+                        attendance.filter(r => r.checkIn && r.checkOut).length
+                      ).toFixed(1)
                       : "0"}h
                   </p>
                 </div>
