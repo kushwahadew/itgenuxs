@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Users, Filter, UserCheck, UserX } from "lucide-react";
 import Navbar from "@/components/Navigation";
 import EmployeeDetailModal from "@/components/EmployeeDetailModal";
+import { record } from "zod";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -29,6 +31,7 @@ const AdminDashboard = () => {
   const [socket, setSocket] = useState(null);
   const { currentUser, logout } = useAuth();
   const { toast } = useToast();
+  const [editingEmployeeId, setEditingEmployeeId] = useState(null);
   const [loading, setLoading] = useState(true); // ✅ Loading state
 
   useEffect(() => {
@@ -93,34 +96,6 @@ const AdminDashboard = () => {
     return () => clearTimeout(timeout);
   }, [loading]);
 
-  // -------------------- Load Employees --------------------
-  const loadEmployees = async () => {
-    try {
-      const { data } = await api.get("/api/v1/users");
-      setEmployees(data.data || []);
-    } catch (error) {
-      console.error("Failed to load employees:", error);
-      toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
-    }
-  };
-
-  // -------------------- Load Today's Attendance --------------------
-  const loadTodayAttendance = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const { data } = await api.get(`/api/v1/attendances?date=${today}`);
-      console.log("Today's attendance:", data.data);
-      setTodayAttendance(data.data || []);
-    } catch (error) {
-      console.error("Failed to load attendance:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load attendance",
-        variant: "destructive",
-      });
-    }
-  };
-
   // -------------------- Filter Employees --------------------
   useEffect(() => {
     let filtered = employees;
@@ -161,6 +136,36 @@ const AdminDashboard = () => {
 
     setFilteredEmployees(filtered);
   }, [employees, attendanceFilter, todayAttendance]);
+
+
+  // -------------------- Load Employees --------------------
+  const loadEmployees = async () => {
+    try {
+      const { data } = await api.get("/api/v1/users");
+      setEmployees(data.data || []);
+    } catch (error) {
+      console.error("Failed to load employees:", error);
+      toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
+    }
+  };
+
+  // -------------------- Load Today's Attendance --------------------
+  const loadTodayAttendance = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const { data } = await api.get(`/api/v1/attendances?date=${today}`);
+      console.log("Today's attendance:", data.data);
+      setTodayAttendance(data.data || []);
+    } catch (error) {
+      console.error("Failed to load attendance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load attendance",
+        variant: "destructive",
+      });
+    }
+  };
+
 
 
   // -------------------- Stats --------------------
@@ -226,6 +231,31 @@ const AdminDashboard = () => {
       });
     }
   };
+
+
+  const handleUpdateAttendance = async (attendanceId, newStatus) => {
+    try {
+      await api.patch(`/api/v1/attendances/admin/update-status`, {
+        attendanceId,
+        status: newStatus,
+      });
+
+      toast({
+        title: "Updated",
+        description: `Attendance marked as ${newStatus}`,
+      });
+
+      loadTodayAttendance(); // ✅ Refresh attendance
+      setEditingEmployeeId(null); // Close popover
+    } catch (error) {
+      console.error("Failed to update attendance:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update attendance",
+        variant: "destructive",
+      });
+    }
+  }
 
   const getDepartmentColor = (dept) => {
     const colors = {
@@ -379,7 +409,6 @@ const AdminDashboard = () => {
               </TableHeader>
               <TableBody>
                 {filteredEmployees.map((employee) => {
-                  const hasAttendanceToday = todayAttendance.some(record => record.employeeId === employee._id && record.checkIn);
                   return (
                     <TableRow key={employee._id}>
                       <TableCell className="font-medium">{employee.employeeid}</TableCell>
@@ -388,39 +417,88 @@ const AdminDashboard = () => {
                       <TableCell><Badge variant="outline" className={getDepartmentColor(employee.department)}>{employee.department}</Badge></TableCell>
                       <TableCell><Badge variant={employee.role === "admin" ? "default" : "secondary"}>{employee.role}</Badge></TableCell>
                       <TableCell>
-                        {(() => {
-                          const record = todayAttendance.find(r => r.employeeId === employee._id);
+                        <Popover
+                          open={editingEmployeeId === employee._id}
+                          onOpenChange={(open) => setEditingEmployeeId(open ? employee._id : null)}
+                        >
+                          <PopoverTrigger asChild>
+                            <div className="cursor-pointer">
+                              {(() => {
+                                const record = todayAttendance.find(r => r.employeeId === employee._id);
 
-                          let status = "Absent";
-                          if (record) {
-                            if (record.checkIn && !record.checkOut) {
-                              status = "Present"; // ✅ live present
-                            } else if (record.status) {
-                              status = record.status;
-                            }
-                          }
+                                let status = "Absent";
+                                if (record) {
+                                  if (record.checkIn && !record.checkOut) {
+                                    status = "Present";
+                                  } else if (record.status) {
+                                    status = record.status;
+                                  }
+                                }
 
-                          if (status === "Present") {
-                            return (
-                              <Badge className="bg-green-100 text-green-800 flex items-center">
-                                <UserCheck size={12} className="mr-1" /> Present
-                              </Badge>
-                            );
-                          } else if (status === "Half Day") {
-                            return (
-                              <Badge className="bg-yellow-100 text-yellow-800 flex items-center">
-                                <UserCheck size={12} className="mr-1" /> Half Day
-                              </Badge>
-                            );
-                          } else {
-                            return (
-                              <Badge className="bg-red-100 text-red-800 flex items-center">
-                                <UserX size={12} className="mr-1" /> Absent
-                              </Badge>
-                            );
-                          }
-                        })()}
+                                if (status === "Present") {
+                                  return (
+                                    <Badge className="bg-green-100 text-green-800 flex items-center">
+                                      <UserCheck size={12} className="mr-1" /> Present
+                                    </Badge>
+                                  );
+                                } else if (status === "Half Day") {
+                                  return (
+                                    <Badge className="bg-yellow-100 text-yellow-800 flex items-center">
+                                      <UserCheck size={12} className="mr-1" /> Half Day
+                                    </Badge>
+                                  );
+                                } else {
+                                  return (
+                                    <Badge className="bg-red-100 text-red-800 flex items-center">
+                                      <UserX size={12} className="mr-1" /> Absent
+                                    </Badge>
+                                  );
+                                }
+                              })()}
+                            </div>
+                          </PopoverTrigger>
+
+                          <PopoverContent className="w-40 p-2 animate-scale-in" align="start">
+                            {(() => {
+                              const record = todayAttendance.find(r => r.employeeId === employee._id);
+                              return (
+                                <div className="space-y-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={!record}
+                                    className="w-full justify-start text-green-700 hover:bg-green-50"
+                                    onClick={() => record && handleUpdateAttendance(record._id, "Present")}
+                                  >
+                                    <UserCheck size={14} className="mr-2" /> Present
+                                  </Button>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={!record}
+                                    className="w-full justify-start text-yellow-700 hover:bg-yellow-50"
+                                    onClick={() => record && handleUpdateAttendance(record._id, "Half Day")}
+                                  >
+                                    <UserCheck size={14} className="mr-2" /> Half Day
+                                  </Button>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={!record}
+                                    className="w-full justify-start text-red-700 hover:bg-red-50"
+                                    onClick={() => record && handleUpdateAttendance(record._id, "Absent")}
+                                  >
+                                    <UserX size={14} className="mr-2" /> Absent
+                                  </Button>
+                                </div>
+                              );
+                            })()}
+                          </PopoverContent>
+                        </Popover>
                       </TableCell>
+
 
                       <TableCell>
                         <div className="flex items-center gap-2">
