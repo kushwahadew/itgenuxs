@@ -32,7 +32,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true); // ✅ Loading state
 
   useEffect(() => {
-    const socketConnection = io(api.defaults.baseURL, { 
+    const socketConnection = io(api.defaults.baseURL, {
       withCredentials: true,
     });
 
@@ -126,17 +126,37 @@ const AdminDashboard = () => {
     let filtered = employees;
 
     if (attendanceFilter !== "all") {
-      const employeesWithAttendance = employees.map((emp) => ({
-        ...emp,
-        hasAttendanceToday: todayAttendance.some(
-          (record) => record.user === emp._id && record.checkIn // ✅ fixed: "user" instead of "employeeId"
-        ),
-      }));
+      const employeesWithAttendance = employees.map((emp) => {
+        const record = todayAttendance.find((r) => r.employeeId === emp._id);
 
-      if (attendanceFilter === "present")
-        filtered = employeesWithAttendance.filter((emp) => emp.hasAttendanceToday);
-      else if (attendanceFilter === "absent")
-        filtered = employeesWithAttendance.filter((emp) => !emp.hasAttendanceToday);
+        let status = "Absent";
+        if (record) {
+          if (record.checkIn && !record.checkOut) {
+            status = "Present"; // ✅ Only checked in → Present
+          } else if (record.status) {
+            status = record.status; // ✅ Use backend status if available
+          }
+        }
+
+        return {
+          ...emp,
+          attendanceStatus: status,
+        };
+      });
+
+      if (attendanceFilter === "present") {
+        filtered = employeesWithAttendance.filter(
+          (emp) => emp.attendanceStatus === "Present"
+        );
+      } else if (attendanceFilter === "Half Day") {
+        filtered = employeesWithAttendance.filter(
+          (emp) => emp.attendanceStatus === "Half Day"
+        );
+      } else if (attendanceFilter === "absent") {
+        filtered = employeesWithAttendance.filter(
+          (emp) => emp.attendanceStatus === "Absent"
+        );
+      }
     }
 
     setFilteredEmployees(filtered);
@@ -337,6 +357,7 @@ const AdminDashboard = () => {
                   <SelectContent>
                     <SelectItem value="all">All Employees</SelectItem>
                     <SelectItem value="present">Present Today</SelectItem>
+                    <SelectItem value="Half Day">Half Day</SelectItem>
                     <SelectItem value="absent">Absent Today</SelectItem>
                   </SelectContent>
                 </Select>
@@ -367,12 +388,40 @@ const AdminDashboard = () => {
                       <TableCell><Badge variant="outline" className={getDepartmentColor(employee.department)}>{employee.department}</Badge></TableCell>
                       <TableCell><Badge variant={employee.role === "admin" ? "default" : "secondary"}>{employee.role}</Badge></TableCell>
                       <TableCell>
-                        {hasAttendanceToday ? (
-                          <Badge variant="secondary" className="bg-green-100 text-green-800"><UserCheck size={12} className="mr-1" />Present</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-red-100 text-red-800"><UserX size={12} className="mr-1" />Absent</Badge>
-                        )}
+                        {(() => {
+                          const record = todayAttendance.find(r => r.employeeId === employee._id);
+
+                          let status = "Absent";
+                          if (record) {
+                            if (record.checkIn && !record.checkOut) {
+                              status = "Present"; // ✅ live present
+                            } else if (record.status) {
+                              status = record.status;
+                            }
+                          }
+
+                          if (status === "Present") {
+                            return (
+                              <Badge className="bg-green-100 text-green-800 flex items-center">
+                                <UserCheck size={12} className="mr-1" /> Present
+                              </Badge>
+                            );
+                          } else if (status === "Half Day") {
+                            return (
+                              <Badge className="bg-yellow-100 text-yellow-800 flex items-center">
+                                <UserCheck size={12} className="mr-1" /> Half Day
+                              </Badge>
+                            );
+                          } else {
+                            return (
+                              <Badge className="bg-red-100 text-red-800 flex items-center">
+                                <UserX size={12} className="mr-1" /> Absent
+                              </Badge>
+                            );
+                          }
+                        })()}
                       </TableCell>
+
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => handleViewEmployee(employee)}><Eye size={14} /></Button>
