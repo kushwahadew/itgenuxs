@@ -7,7 +7,7 @@ const clients = [
     role: "CEO, Tech Innovations",
     image: "/client-sarah.png",
     review:
-      "ITGeniux transformed our outdated website into a modern, efficient platform. The team was professional, responsive, and delivered beyond our expectations.",
+      "ITGenixs transformed our outdated website into a modern, efficient platform. The team was professional, responsive, and delivered beyond our expectations.",
   },
   {
     name: "Michael Chen",
@@ -21,7 +21,7 @@ const clients = [
     role: "Founder, StartUp Hub",
     image: "/client-priya.png",
     review:
-      "The level of support and attention to detail from ITGeniux is exceptional. They truly understand business needs and deliver accordingly.",
+      "The level of support and attention to detail from ITGenixs is exceptional. They truly understand business needs and deliver accordingly.",
   },
   // add more clients
 ];
@@ -32,7 +32,7 @@ const HappyClients = () => {
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h3 className="text-3xl font-bold mb-4 text-foreground">Happy Clients</h3>
         <p className="text-lg text-foreground-secondary mb-10 max-w-2xl mx-auto">
-          Don't just take our word for it. Here's what our clients say about working with ITGeniux.
+          Don't just take our word for it. Here's what our clients say about working with ITGenixs.
         </p>
 
         {/* Slider */}

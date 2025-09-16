@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import emailjs from "@emailjs/browser";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const Contact = () => {
     phone: "",
     message: ""
   });
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -20,21 +22,73 @@ const Contact = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    setErrors({ ...errors, [e.target.name]: "" }); // Clear error on change
+  };
+
+  // Frontend validation function
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
+    }
+
+    if (!formData.message.trim()) newErrors.message = "Message is required";
+
+    // Phone validation (optional)
+    if (formData.phone) {
+      const phoneDigits = formData.phone.replace(/\D/g, ""); // Remove non-numeric characters
+      if (phoneDigits.length !== 10) newErrors.phone = "Phone number must be at least 10 digits";
+    }
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await emailjs.send(
+        "service_5vh2npe",     // Your Service ID
+        "template_kxyy45x",    // Your Template ID
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        },
+        "SfCPo7-pvmd3MuQam"    // Your Public Key
+      );
+
       toast({
-        title: "Message Sent Successfully!",
+        title: "Message Sent Successfully! 🎉",
         description: "We'll get back to you within 24 hours.",
       });
+
       setFormData({ name: "", email: "", phone: "", message: "" });
-    }, 2000);
+      setErrors({});
+    } catch (error) {
+      console.error("Email send error:", error);
+      toast({
+        title: "Error!",
+        description: "Message could not be sent. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -47,13 +101,13 @@ const Contact = () => {
     {
       icon: Phone,
       label: "Phone",
-      value: "+91 98765 43210",
-      href: "tel:+919876543210"
+      value: "+91 95461 97882",
+      href: "tel:+919546197882"
     },
     {
       icon: MapPin,
       label: "Office",
-      value: "Bangalore, Karnataka, India",
+      value: "Ranchi, Jharkhand, India",
       href: "#"
     }
   ];
@@ -94,25 +148,6 @@ const Contact = () => {
                 ))}
               </div>
             </div>
-
-            {/* Business Hours */}
-            <div className="card-gradient p-8 rounded-2xl border border-card-border">
-              <h3 className="text-xl font-bold mb-4 text-foreground">Business Hours</h3>
-              <div className="space-y-2 text-foreground-secondary">
-                <div className="flex justify-between">
-                  <span>Monday - Friday</span>
-                  <span>9:00 AM - 6:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saturday</span>
-                  <span>10:00 AM - 4:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sunday</span>
-                  <span>Closed</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Contact Form */}
@@ -136,6 +171,7 @@ const Contact = () => {
                       className="bg-background border-card-border focus:border-primary"
                       placeholder="Your full name"
                     />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
@@ -151,6 +187,7 @@ const Contact = () => {
                       className="bg-background border-card-border focus:border-primary"
                       placeholder="your@email.com"
                     />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                   </div>
                 </div>
                 
@@ -165,8 +202,9 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="bg-background border-card-border focus:border-primary"
-                    placeholder="+91 98765 43210"
+                    placeholder="98765 43210"
                   />
+                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                 </div>
                 
                 <div>
@@ -183,6 +221,7 @@ const Contact = () => {
                     className="bg-background border-card-border focus:border-primary resize-none"
                     placeholder="Tell us about your project..."
                   />
+                  {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                 </div>
                 
                 <Button

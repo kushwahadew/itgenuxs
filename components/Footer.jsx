@@ -1,23 +1,22 @@
 
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";  // ✅ Next.js Link
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: Instagram, href: "#", label: "Instagram" }
+    { icon: Facebook, href: "https://www.facebook.com/share/1G8XgseZ9V/", label: "Facebook" },
+    { icon: Linkedin, href: "https://www.linkedin.com/company/itgenix-technology-pvt-ltd/", label: "LinkedIn" },
+    { icon: Instagram, href: "https://www.instagram.com/itgenixs_pvt.ltd?igsh=MnBpejAwNGsyZzl4", label: "Instagram" }
   ];
 
   const quickLinks = [
     { name: "About Us", href: "/#about" },
     { name: "Services", href: "/#services" },
     { name: "Contact", href: "/#contact" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Terms of Service", href: "/terms" }
+    { name: "Privacy Policy", href: "tncandpp/PrivacyPolicy" },
+    { name: "Terms of Service", href: "tncandpp/TermsAndConditions" }
   ];
 
   const services = [
@@ -41,7 +40,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h3 className="text-2xl font-bold text-gradient mb-4">ITGeniux</h3>
+              <h3 className="text-2xl font-bold text-gradient mb-4">ITGenixs</h3>
               <p className="text-foreground-secondary leading-relaxed">
                 Empowering businesses with next-generation IT solutions. 
                 Your trusted partner for digital transformation.
@@ -52,15 +51,15 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-foreground-secondary">
                 <Mail className="w-4 h-4 text-primary" />
-                <span className="text-sm">info@itgeniux.com</span>
+                <span className="text-sm">info@itgenixs.com</span>
               </div>
               <div className="flex items-center space-x-3 text-foreground-secondary">
                 <Phone className="w-4 h-4 text-primary" />
-                <span className="text-sm">+91 98765 43210</span>
+                <span className="text-sm">+91 9546 197 882</span>
               </div>
               <div className="flex items-center space-x-3 text-foreground-secondary">
                 <MapPin className="w-4 h-4 text-primary" />
-                <span className="text-sm">Bangalore, Karnataka, India</span>
+                <span className="text-sm">Ranchi, Jharkhand, India</span>
               </div>
             </div>
           </div>
@@ -152,13 +151,12 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-card-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-foreground-secondary text-center md:text-left">
-              © {currentYear} ITGeniux Pvt. Ltd. All rights reserved.
+              © {currentYear} ITGenixs Pvt. Ltd. All rights reserved.
             </div>
             
             <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 text-sm text-foreground-secondary">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
+              <Link href="tncandpp/PrivacyPolicy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link href="tncandpp/TermsAndConditions" className="hover:text-primary transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

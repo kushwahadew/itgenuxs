@@ -1,8 +1,9 @@
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import { Providers } from "./providers";
 
 export const metadata = {
-  title: "ItGeniux",
+  title: "ITGenixs",
   description: "Next.js converted project",
 };
 

@@ -9,10 +9,10 @@ const About = () => {
         {/* Section Header */}
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            About <span className="text-gradient">ITGeniux</span>
+            About <span className="text-gradient">ITGenixs</span>
           </h2>
           <p className="text-xl text-foreground-secondary max-w-3xl mx-auto">
-            Founded in 2025, ITGeniux Pvt. Ltd. is dedicated to providing affordable, advanced technology solutions that empower businesses to thrive in the digital age.
+            Founded in 2025, ITGenixs Pvt. Ltd. is dedicated to providing affordable, advanced technology solutions that empower businesses to thrive in the digital age.
           </p>
         </div>
 

@@ -320,3 +320,25 @@
     transform: translateX(-50%);
   }
 }
+
+
+
+/* --- Leaflet custom marker styling for company logo --- */
+.itgenixs-marker {
+  border-radius: 9999px;          /* make icon circular if the image is square */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  border: 2px solid rgba(255,255,255,0.9);
+  background-color: transparent;
+  transform-origin: center;
+}
+
+/* small scale up on hover (visual only) */
+.leaflet-container .itgenixs-marker:hover {
+  transform: scale(1.05);
+}
+
+/* Fix marker image rendering (Leaflet sets img to display:block) */
+.itgenixs-marker img {
+  display: block;
+  border-radius: inherit;
+}
