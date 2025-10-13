@@ -3,7 +3,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import FloatingAgent from "@/components/FloatingAgent";
+// import FloatingAgent from "@/components/FloatingAgent";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Brain, Cpu, Zap, Bot } from "lucide-react";
 import Link from "next/link";
@@ -168,7 +168,7 @@ const AISolutions = () => {
 
       <Footer />
       <FloatingWhatsApp />
-      <FloatingAgent/>
+      {/* <FloatingAgent/> */}
     </div>
   );
 };
