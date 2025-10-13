@@ -3,7 +3,7 @@ import React from 'react';
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import FloatingAgent from "@/components/FloatingAgent";
+// import FloatingAgent from "@/components/FloatingAgent";
 
 const TermsAndConditions = () => {
   return (
@@ -221,7 +221,7 @@ const TermsAndConditions = () => {
       </div>
       <Footer />
       <FloatingWhatsApp />
-      <FloatingAgent />
+      {/* <FloatingAgent /> */}
     </div>
   );
 };
