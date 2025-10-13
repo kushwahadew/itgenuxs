@@ -3,6 +3,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import FloatingAgent from "@/components/FloatingAgent";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Code2, Smartphone, Zap, Shield, Globe, Phone, Mail, ShoppingCart, Search, BarChart, MessageSquare } from "lucide-react";
 import Link from "next/link";
@@ -287,6 +288,7 @@ const WebDevelopment = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <FloatingAgent/>
     </div>
   );
 };

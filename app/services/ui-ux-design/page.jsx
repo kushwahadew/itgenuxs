@@ -3,6 +3,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import FloatingAgent from "@/components/FloatingAgent";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Palette, Users, Eye, Lightbulb } from "lucide-react";
 import Link from "next/link"; // ✅ Use Next.js Link
@@ -208,6 +209,7 @@ const UIUXDesign = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <FloatingAgent/>
     </div>
   );
 };

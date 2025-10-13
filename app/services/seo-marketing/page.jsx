@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { Button } from "@/components/ui/button";
+import FloatingAgent from "@/components/FloatingAgent";
 import { CheckCircle, Search, TrendingUp, Target, BarChart, Instagram, Facebook, Globe, Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import seoHero from "@/assets/seo-marketing-hero.png";
@@ -307,6 +308,7 @@ const SEOMarketing = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <FloatingAgent/>
     </div>
   );
 };

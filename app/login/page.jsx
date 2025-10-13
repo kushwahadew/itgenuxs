@@ -115,17 +115,6 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center space-y-2">
-            <p className="text-sm text-muted-foreground">Demo Credentials:</p>
-            <div className="text-xs space-y-1">
-              <p>
-                <strong>Admin:</strong> EMP001 / admin123
-              </p>
-              <p>
-                <strong>Employee:</strong> EMP002 / employee123
-              </p>
-            </div>
-          </div>
 
           <div className="mt-4 text-center">
             <a href="/" className="text-sm text-primary hover:underline">

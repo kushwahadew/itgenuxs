@@ -3,6 +3,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import FloatingAgent from "@/components/FloatingAgent";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Smartphone, Apple, MonitorSpeaker, Zap } from "lucide-react";
 import Link from "next/link"; // ✅ Use Next.js Link
@@ -206,6 +207,7 @@ const MobileDevelopment = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <FloatingAgent/>
     </div>
   );
 };

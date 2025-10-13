@@ -7,6 +7,7 @@ import About from "@/components/About";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import FloatingAgent from "@/components/FloatingAgent";
 import Roadmap from "../components/Roadmap";
 
 const Index = () => {
@@ -30,6 +31,7 @@ const Index = () => {
       </section>
       <Footer />
       <FloatingWhatsApp />
+      <FloatingAgent/>
     </div>
   );
 };

@@ -7,18 +7,18 @@ const FloatingWhatsApp = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-24 right-8 transform -translate-y-1/2 z-50">
       <Button
         onClick={handleWhatsAppClick}
-        className="rounded-full w-14 h-14 bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+        className="rounded-full w-12 h-10 bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
         size="icon"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-6 h-4" />
         <span className="sr-only">Get in Touch via WhatsApp</span>
       </Button>
       
       {/* Tooltip */}
-      <div className="absolute bottom-16 right-0 mb-2 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      <div className="absolute bottom-20 right-0 mb-2 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
         <div className="bg-gray-800 text-white text-sm py-2 px-3 rounded-lg whitespace-nowrap">
           Get in Touch
           <div className="absolute top-full left-1/2 transform -translate-x-1/2">
