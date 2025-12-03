@@ -80,6 +80,7 @@ const AdminDashboard = () => {
     fetchData();
   }, [currentUser, loadEmployees, loadTodayAttendance]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
@@ -93,7 +94,7 @@ const AdminDashboard = () => {
     }, 5000); // 5 sec
 
     return () => clearTimeout(timeout);
-  }, [loading, toast]);
+  }, [loading]);
 
   // -------------------- Filter Employees --------------------
   useEffect(() => {
