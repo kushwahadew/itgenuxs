@@ -17,7 +17,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Users, Filter, UserCheck, UserX } from "lucide-react";
 import Navbar from "@/components/Navigation";
 import EmployeeDetailModal from "@/components/EmployeeDetailModal";
-import { record } from "zod";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([]);
