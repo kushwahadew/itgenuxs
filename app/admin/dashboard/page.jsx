@@ -1,7 +1,7 @@
 "use client";
 
 import { io } from "socket.io-client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
     };
 
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, loadEmployees, loadTodayAttendance]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
 
 
   // -------------------- Load Employees --------------------
-  const loadEmployees = async () => {
+  const loadEmployees = useCallback(async () => {
     try {
       const { data } = await api.get("/api/v1/users");
       setEmployees(data.data || []);
@@ -147,10 +147,10 @@ const AdminDashboard = () => {
       console.error("Failed to load employees:", error);
       toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
     }
-  };
+  }, [toast]);
 
   // -------------------- Load Today's Attendance --------------------
-  const loadTodayAttendance = async () => {
+  const loadTodayAttendance = useCallback(async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
       const { data } = await api.get(`/api/v1/attendances?date=${today}`);
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
 
 
