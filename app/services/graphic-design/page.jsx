@@ -37,7 +37,7 @@ const GraphicDesign = () => {
   const packages = [
     {
       name: "Brand Starter",
-      price: "Custom",
+      price: "$799",
       features: [
         "Logo design (3 concepts)",
         "Business card design",
@@ -48,7 +48,7 @@ const GraphicDesign = () => {
     },
     {
       name: "Complete Branding",
-      price: "Custom",
+      price: "$2,299",
       features: [
         "Complete brand identity",
         "Marketing materials package",

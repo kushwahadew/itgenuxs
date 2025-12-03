@@ -36,7 +36,7 @@ const UIUXDesign = () => {
   const packages = [
     {
       name: "UI Design",
-      price: "Custom",
+      price: "$1,999",
       features: [
         "5-10 screen designs",
         "Responsive layouts",
@@ -47,7 +47,7 @@ const UIUXDesign = () => {
     },
     {
       name: "Full UX/UI Package",
-      price: "Custom",
+      price: "$4,999",
       features: [
         "User research & personas",
         "Wireframes & prototypes",

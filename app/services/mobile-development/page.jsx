@@ -36,7 +36,7 @@ const MobileDevelopment = () => {
   const packages = [
     {
       name: "MVP App",
-      price: "Custom",
+      price: "$4,999",
       features: [
         "Cross-platform app (iOS & Android)",
         "5-10 core features",
@@ -47,7 +47,7 @@ const MobileDevelopment = () => {
     },
     {
       name: "Business App",
-      price: "Custom",
+      price: "$12,999",
       features: [
         "Advanced features & integrations",
         "Custom UI/UX design",
