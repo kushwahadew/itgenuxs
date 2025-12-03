@@ -4,7 +4,8 @@ const FloatingAgent = () => {
     const containerRef = useRef(null);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        const node = containerRef.current;
+        if (!node) return;
 
         // Load the ElevenLabs script if not already loaded
         if (!document.querySelector('script[src*="convai-widget-embed"]')) {
@@ -20,12 +21,12 @@ const FloatingAgent = () => {
         widget.setAttribute('agent-id', 'agent_6801k5gdcqswfbbt3beqd7d26fmn');
 
         // Append to container
-        containerRef.current.appendChild(widget);
+        node.appendChild(widget);
 
         // Cleanup function
         return () => {
-            if (containerRef.current && widget && containerRef.current.contains(widget)) {
-                containerRef.current.removeChild(widget);
+            if (node && widget && node.contains(widget)) {
+                node.removeChild(widget);
             }
         };
     }, []);

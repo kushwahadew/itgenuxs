@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,10 +62,10 @@ const EmployeeDashboard = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, currentUser]);
+  }, [isAuthenticated, currentUser, loadAttendance, loadTodayAttendance]);
 
   // --- API-based functions ---
-  const loadAttendance = async () => {
+  const loadAttendance = useCallback(async () => {
     try {
       const res = await api.get(`/api/v1/attendances`);
       const records = res.data.data || [];
@@ -78,9 +78,9 @@ const EmployeeDashboard = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
-  const loadTodayAttendance = async () => {
+  const loadTodayAttendance = useCallback(async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
       const res = await api.get(`/api/v1/attendances?date=${today}`);
@@ -92,7 +92,7 @@ const EmployeeDashboard = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
 
   const handleCheckIn = async () => {
     try {

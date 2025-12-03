@@ -48,7 +48,7 @@ const AdminDashboard = () => {
     });
 
     return () => socketConnection.disconnect();
-  }, []);
+  }, [loadEmployees, loadTodayAttendance]);
 
   // -------------------- Fetch Employees & Attendance --------------------
   useEffect(() => {
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
     }, 5000); // 5 sec
 
     return () => clearTimeout(timeout);
-  }, [loading]);
+  }, [loading, toast]);
 
   // -------------------- Filter Employees --------------------
   useEffect(() => {
