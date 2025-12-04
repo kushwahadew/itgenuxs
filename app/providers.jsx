@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/AuthContext"; // ✅ import AuthProvider
@@ -15,7 +15,7 @@ export function Providers({ children }) {
       <ThemeProvider defaultTheme="dark" storageKey="itgeniux-theme">
         <TooltipProvider>
           <Toaster />
-          <Sonner />
+          <SonnerToaster />
           <AuthProvider> {/* ✅ wrap everything with AuthProvider */}
             {children}
           </AuthProvider>

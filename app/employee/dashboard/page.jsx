@@ -46,8 +46,39 @@ const EmployeeDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const loadAttendance = async () => {
+      try {
+        const res = await api.get(`/api/v1/attendances`);
+        const records = res.data.data || [];
+        records.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setAttendance(records.slice(0, 14));
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Failed to load attendance",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const loadTodayAttendance = async () => {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const res = await api.get(`/api/v1/attendances?date=${today}`);
+        setTodayAttendance(res.data.data?.[0] || null);
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Failed to load today's attendance",
+          variant: "destructive",
+        });
+      }
+    };
+
     if (!isAuthenticated || !currentUser) {
-      window.location.href = "/";
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
       return;
     }
     const fetchData = async () => {
@@ -62,37 +93,7 @@ const EmployeeDashboard = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, currentUser, loadAttendance, loadTodayAttendance]);
-
-  // --- API-based functions ---
-  const loadAttendance = useCallback(async () => {
-    try {
-      const res = await api.get(`/api/v1/attendances`);
-      const records = res.data.data || [];
-      records.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setAttendance(records.slice(0, 14));
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to load attendance",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  const loadTodayAttendance = useCallback(async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const res = await api.get(`/api/v1/attendances?date=${today}`);
-      setTodayAttendance(res.data.data?.[0] || null);
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: "Failed to load today's attendance",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
+  }, [isAuthenticated, currentUser, toast]);
 
   const handleCheckIn = async () => {
     try {
@@ -101,8 +102,8 @@ const EmployeeDashboard = () => {
         title: "Checked in successfully",
         description: `Check-in time: ${new Date(res.data.data.checkIn).toLocaleTimeString()}`,
       });
-      await loadAttendance();
-      await loadTodayAttendance();
+      // await loadAttendance();
+      // await loadTodayAttendance();
 
     } catch (err) {
       toast({
@@ -120,8 +121,8 @@ const EmployeeDashboard = () => {
         title: "Checked out successfully",
         description: `Check-out time: ${new Date(res.data.data.checkOut).toLocaleTimeString()}`,
       });
-      await loadAttendance();
-      await loadTodayAttendance();
+      // await loadAttendance();
+      // await loadTodayAttendance();
     } catch (err) {
       toast({
         title: "Error",
@@ -166,7 +167,9 @@ const EmployeeDashboard = () => {
         description: "Your profile has been updated successfully",
       });
       setIsEditDialogOpen(false);
-      window.location.reload();
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
     } catch (err) {
       toast({
         title: "Error",

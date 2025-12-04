@@ -34,24 +34,42 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true); // ✅ Loading state
 
   useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const { data } = await api.get("/api/v1/users");
+        setEmployees(data.data || []);
+      } catch (error) {
+        console.error("Failed to load employees:", error);
+        toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
+      }
+    };
+
+    const loadTodayAttendance = async () => {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const { data } = await api.get(`/api/v1/attendances?date=${today}`);
+        console.log("Today's attendance:", data.data);
+        setTodayAttendance(data.data || []);
+      } catch (error) {
+        console.error("Failed to load attendance:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load attendance",
+          variant: "destructive",
+        });
+      }
+    };
+
     const socketConnection = io(api.defaults.baseURL, {
       withCredentials: true,
     });
 
     setSocket(socketConnection);
 
-    // Listen for attendance updates
     socketConnection.on("attendanceUpdated", (data) => {
       loadTodayAttendance();
       loadEmployees();
     });
-
-    return () => socketConnection.disconnect();
-  }, [loadEmployees, loadTodayAttendance]);
-
-  // -------------------- Fetch Employees & Attendance --------------------
-  useEffect(() => {
-    console.log("Current user:", currentUser);
 
     if (currentUser === null) {
       // Still fetching user, wait
@@ -60,7 +78,9 @@ const AdminDashboard = () => {
 
     if (!currentUser || currentUser.role !== "admin") {
       console.log("Redirecting to login...");
-      window.location.href = "/login";
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
       return;
     }
 
@@ -78,10 +98,7 @@ const AdminDashboard = () => {
     };
 
     fetchData();
-  }, [currentUser, loadEmployees, loadTodayAttendance]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
         toast({
@@ -89,12 +106,17 @@ const AdminDashboard = () => {
           description: "Please try again later.",
           variant: "destructive",
         });
-        window.location.href = "/"; // redirect to landing page
+        if (typeof window !== "undefined") {
+          window.location.href = "/"; // redirect to landing page
+        }
       }
     }, 5000); // 5 sec
 
-    return () => clearTimeout(timeout);
-  }, [loading]);
+    return () => {
+      socketConnection.disconnect();
+      clearTimeout(timeout);
+    };
+  }, [currentUser, loading, toast]);
 
   // -------------------- Filter Employees --------------------
   useEffect(() => {
@@ -136,36 +158,6 @@ const AdminDashboard = () => {
 
     setFilteredEmployees(filtered);
   }, [employees, attendanceFilter, todayAttendance]);
-
-
-  // -------------------- Load Employees --------------------
-  const loadEmployees = useCallback(async () => {
-    try {
-      const { data } = await api.get("/api/v1/users");
-      setEmployees(data.data || []);
-    } catch (error) {
-      console.error("Failed to load employees:", error);
-      toast({ title: "Error", description: "Failed to load employees", variant: "destructive" });
-    }
-  }, [toast]);
-
-  // -------------------- Load Today's Attendance --------------------
-  const loadTodayAttendance = useCallback(async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      const { data } = await api.get(`/api/v1/attendances?date=${today}`);
-      console.log("Today's attendance:", data.data);
-      setTodayAttendance(data.data || []);
-    } catch (error) {
-      console.error("Failed to load attendance:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load attendance",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
 
 
   // -------------------- Stats --------------------
@@ -245,7 +237,7 @@ const AdminDashboard = () => {
         description: `Attendance marked as ${newStatus}`,
       });
 
-      loadTodayAttendance(); // ✅ Refresh attendance
+      // loadTodayAttendance(); // ✅ Refresh attendance
       setEditingEmployeeId(null); // Close popover
     } catch (error) {
       console.error("Failed to update attendance:", error);
