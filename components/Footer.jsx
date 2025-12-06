@@ -134,6 +134,7 @@ const Footer = () => {
                   aria-label="Email address"
                   className="flex-1 px-3 py-2 bg-card border border-card-border rounded-lg text-sm focus:outline-none focus:border-primary"
                   required
+                  suppressHydrationWarning
                 />
                 <button
                   type="submit"

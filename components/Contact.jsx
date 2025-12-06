@@ -157,7 +157,7 @@ const Contact = () => {
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div suppressHydrationWarning>
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                       Name *
                     </label>
@@ -173,7 +173,7 @@ const Contact = () => {
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                   </div>
-                  <div>
+                  <div suppressHydrationWarning>
                     <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                       Email *
                     </label>

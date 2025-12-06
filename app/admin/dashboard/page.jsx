@@ -62,6 +62,7 @@ const AdminDashboard = () => {
 
     const socketConnection = io(api.defaults.baseURL, {
       withCredentials: true,
+      transports: ['websocket', 'polling'],
     });
 
     setSocket(socketConnection);
@@ -99,24 +100,10 @@ const AdminDashboard = () => {
 
     fetchData();
 
-    const timeout = setTimeout(() => {
-      if (loading) {
-        toast({
-          title: "Timeout",
-          description: "Please try again later.",
-          variant: "destructive",
-        });
-        if (typeof window !== "undefined") {
-          window.location.href = "/"; // redirect to landing page
-        }
-      }
-    }, 5000); // 5 sec
-
     return () => {
       socketConnection.disconnect();
-      clearTimeout(timeout);
     };
-  }, [currentUser, loading, toast]);
+  }, [currentUser, toast]);
 
   // -------------------- Filter Employees --------------------
   useEffect(() => {
