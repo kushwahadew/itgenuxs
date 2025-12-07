@@ -21,12 +21,12 @@ const AISolutions = () => {
   const packages = [
     {
       name: "AI Starter",
-      price: "$4,999",
+      price: "Custom",
       features: ["Basic AI model development", "Data preprocessing", "Simple automation", "Performance monitoring", "3 months support"],
     },
     {
       name: "AI Business Suite",
-      price: "$15,999",
+      price: "Custom",
       features: ["Advanced ML algorithms", "Custom AI integrations", "Process automation", "Real-time analytics", "API development", "6 months support"],
     },
     {

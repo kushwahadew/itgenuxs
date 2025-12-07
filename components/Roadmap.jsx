@@ -5,7 +5,7 @@ const roadmapData = [
   {
     id: 1,
     title: "ITGenixs",
-    date: "May 1, 2025",
+    // date: "May 1, 2025",
     description:
       "ITGenixs Pvt. Ltd. launched, specializing in innovative software development solutions.",
     icon: Building,
@@ -16,7 +16,7 @@ const roadmapData = [
   {
     id: 2,
     title: "Registration",
-    date: "September 1, 2025",
+    // date: "September 1, 2025",
     description: "ITGenixs Pvt. Ltd. officially registered with government.",
     icon: Calendar,
     color: "bg-green-500",
@@ -26,7 +26,7 @@ const roadmapData = [
   {
     id: 3,
     title: "Funding",
-    date: "December 1, 2025",
+    // date: "December 1, 2025",
     description:
       "ITGenixs Pvt. Ltd. secured 5 cr funding for development expenses.",
     icon: DollarSign,
@@ -37,7 +37,7 @@ const roadmapData = [
   {
     id: 4,
     title: "Shopping",
-    date: "February 1, 2026",
+    // date: "February 1, 2026",
     description:
       "ITGenixs Pvt. Ltd. will launch shopping portal, featuring IT sector products.",
     icon: ShoppingCart,
@@ -48,7 +48,7 @@ const roadmapData = [
   {
     id: 5,
     title: "Branches",
-    date: "May 1, 2026",
+    // date: "May 1, 2026",
     description: "ITGenixs Pvt Ltd will open branches across India.",
     icon: MapPin,
     color: "bg-blue-500",
