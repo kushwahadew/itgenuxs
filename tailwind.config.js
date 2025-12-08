@@ -20,6 +20,11 @@ module.exports = {
     },
     extend: {
       colors: {
+        'badge-local': 'hsl(var(--badge-local))',
+        'badge-web': 'hsl(var(--badge-web))',
+        'badge-seo': 'hsl(var(--badge-seo))',
+        'badge-ads': 'hsl(var(--badge-ads))',
+        'badge-case': 'hsl(var(--badge-case))',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

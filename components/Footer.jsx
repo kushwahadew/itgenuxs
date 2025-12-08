@@ -1,4 +1,6 @@
 
+"use client";
+
 import { Facebook, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";  // ✅ Next.js Link
 
@@ -15,6 +17,7 @@ const Footer = () => {
     { name: "About Us", href: "/#about" },
     { name: "Services", href: "/#services" },
     { name: "Contact", href: "/#contact" },
+    { name: "Careers", href: "https://career.itgenixs.com/" },
     { name: "Privacy Policy", href: "tncandpp/PrivacyPolicy" },
     { name: "Terms of Service", href: "tncandpp/TermsAndConditions" }
   ];

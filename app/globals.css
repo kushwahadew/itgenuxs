@@ -8,6 +8,13 @@
 
 @layer base {
   :root {
+    /* Badge Colors */
+    --badge-local: 217 91% 60%;
+    --badge-web: 266 85% 66%;
+    --badge-seo: 145 63% 49%;
+    --badge-ads: 33 91% 54%;
+    --badge-case: 168 81% 42%;
+
     /* Background System */
     --background: 224 71% 4%;
     --background-secondary: 223 47% 8%;
