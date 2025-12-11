@@ -156,24 +156,26 @@ const Contact = () => {
               <h3 className="text-2xl font-bold mb-6 text-foreground">Send us a Message</h3>
               
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div suppressHydrationWarning>
+                
+                  
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                       Name *
                     </label>
                     <Input
                       id="name"
                       name="name"
+      
                       type="text"
                       required
                       value={formData.name}
                       onChange={handleInputChange}
                       className="bg-background border-card-border focus:border-primary"
                       placeholder="Your full name"
+                      suppressHydrationWarning
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                  </div>
-                  <div suppressHydrationWarning>
+                  
+                  
                     <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                       Email *
                     </label>
@@ -186,13 +188,13 @@ const Contact = () => {
                       onChange={handleInputChange}
                       className="bg-background border-card-border focus:border-primary"
                       placeholder="your@email.com"
+                      suppressHydrationWarning
                     />
                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                  </div>
-                </div>
+                  
                 
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
+                
+                <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
                     Phone
                   </label>
                   <Input
@@ -203,11 +205,12 @@ const Contact = () => {
                     onChange={handleInputChange}
                     className="bg-background border-card-border focus:border-primary"
                     placeholder="98765 43210"
+                    suppressHydrationWarning
                   />
                   {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-                </div>
                 
-                <div>
+                
+                <div suppressHydrationWarning>
                   <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
                     Message *
                   </label>

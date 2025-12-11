@@ -22,10 +22,15 @@ const AdminDashboard = () => {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [attendanceFilter, setAttendanceFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [todayAttendance, setTodayAttendance] = useState([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "", dept: "", password: "" });
   const [socket, setSocket] = useState(null);
   const { currentUser, logout } = useAuth();
@@ -109,8 +114,16 @@ const AdminDashboard = () => {
   useEffect(() => {
     let filtered = employees;
 
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(employee =>
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
     if (attendanceFilter !== "all") {
-      const employeesWithAttendance = employees.map((emp) => {
+      const employeesWithAttendance = filtered.map((emp) => {
         const record = todayAttendance.find((r) => r.employeeId === emp._id);
 
         let status = "Absent";
@@ -144,7 +157,7 @@ const AdminDashboard = () => {
     }
 
     setFilteredEmployees(filtered);
-  }, [employees, attendanceFilter, todayAttendance]);
+  }, [employees, attendanceFilter, todayAttendance, searchTerm]);
 
 
   // -------------------- Stats --------------------
@@ -180,14 +193,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteEmployee = async (id) => {
+
+  const handleDeleteEmployee = (id) => {
+    setEmployeeToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
     try {
-      await api.delete(`/api/v1/users/${id}`);
-      setEmployees(prev => prev.filter(emp => emp._id !== id));
+      await api.delete(`/api/v1/users/${employeeToDelete}`);
+      setEmployees(prev => prev.filter(emp => emp._id !== employeeToDelete));
       toast({ title: "Success", description: "Employee deleted successfully" });
     } catch (error) {
       console.error("Failed to delete employee:", error);
       toast({ title: "Error", description: "Failed to delete employee", variant: "destructive" });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
     }
   };
 
@@ -313,7 +337,23 @@ const AdminDashboard = () => {
                 <Button onClick={handleAddEmployee}>Create Employee</Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+                    </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete the employee account.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={confirmDeleteEmployee}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         </div>
 
         {/* Stats */}
@@ -360,6 +400,12 @@ const AdminDashboard = () => {
                 <CardDescription>View and manage all employees in the system</CardDescription>
               </div>
               <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Search by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-64"
+                />
                 <Filter size={16} className="text-muted-foreground" />
                 <Select value={attendanceFilter} onValueChange={setAttendanceFilter}>
                   <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>

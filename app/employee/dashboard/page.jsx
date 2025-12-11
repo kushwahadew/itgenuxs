@@ -45,36 +45,36 @@ const EmployeeDashboard = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
+  const loadAttendance = useCallback(async () => {
+    try {
+      const res = await api.get(`/api/v1/attendances`);
+      const records = res.data.data || [];
+      records.sort((a, b) => new Date(b.date) - new Date(a.date));
+      setAttendance(records.slice(0, 14));
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to load attendance",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
+  const loadTodayAttendance = useCallback(async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const res = await api.get(`/api/v1/attendances?date=${today}`);
+      setTodayAttendance(res.data.data?.[0] || null);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to load today's attendance",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
-    const loadAttendance = async () => {
-      try {
-        const res = await api.get(`/api/v1/attendances`);
-        const records = res.data.data || [];
-        records.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setAttendance(records.slice(0, 14));
-      } catch (err) {
-        toast({
-          title: "Error",
-          description: "Failed to load attendance",
-          variant: "destructive",
-        });
-      }
-    };
-
-    const loadTodayAttendance = async () => {
-      try {
-        const today = new Date().toISOString().split("T")[0];
-        const res = await api.get(`/api/v1/attendances?date=${today}`);
-        setTodayAttendance(res.data.data?.[0] || null);
-      } catch (err) {
-        toast({
-          title: "Error",
-          description: "Failed to load today's attendance",
-          variant: "destructive",
-        });
-      }
-    };
-
     if (!isAuthenticated || !currentUser) {
       if (typeof window !== "undefined") {
         window.location.href = "/";
@@ -93,7 +93,7 @@ const EmployeeDashboard = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, currentUser, toast]);
+  }, [isAuthenticated, currentUser, loadAttendance, loadTodayAttendance]);
 
   const handleCheckIn = async () => {
     try {
@@ -102,8 +102,8 @@ const EmployeeDashboard = () => {
         title: "Checked in successfully",
         description: `Check-in time: ${new Date(res.data.data.checkIn).toLocaleTimeString()}`,
       });
-      // await loadAttendance();
-      // await loadTodayAttendance();
+      await loadAttendance();
+      await loadTodayAttendance();
 
     } catch (err) {
       toast({
@@ -121,8 +121,8 @@ const EmployeeDashboard = () => {
         title: "Checked out successfully",
         description: `Check-out time: ${new Date(res.data.data.checkOut).toLocaleTimeString()}`,
       });
-      // await loadAttendance();
-      // await loadTodayAttendance();
+      await loadAttendance();
+      await loadTodayAttendance();
     } catch (err) {
       toast({
         title: "Error",
@@ -243,19 +243,19 @@ const EmployeeDashboard = () => {
                   </DialogHeader>
 
                   <div className="space-y-4">
-                    <div>
+                    <div suppressHydrationWarning>
                       <Label htmlFor="editName">Name</Label>
                       <Input id="editName" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
                     </div>
-                    <div>
+                    <div suppressHydrationWarning>
                       <Label htmlFor="editEmail">Email</Label>
                       <Input id="editEmail" type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
                     </div>
-                    <div>
+                    <div suppressHydrationWarning>
                       <Label htmlFor="editPassword">Old Password (optional)</Label>
                       <Input id="editOldPassword" type="password" value={editForm.oldPassword} onChange={(e) => setEditForm({ ...editForm, oldPassword: e.target.value })} placeholder="Enter old password" />
                     </div>
-                    <div>
+                    <div suppressHydrationWarning>
                       <Label htmlFor="editPassword">New Password (optional)</Label>
                       <Input id="editNewPassword" type="password" value={editForm.newPassword} onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })} placeholder="Enter new password" />
                     </div>
